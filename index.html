@@ -7,8 +7,8 @@
   const ctx = canvas.getContext("2d");
 
   // Supabase
-  const SUPABASE_URL = "https://YOUR_PROJECT_ID.supabase.co";
-  const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImF0b3ZweXF2anNndnpwemV4bXl3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA0MDUyODcsImV4cCI6MjA5NTk4MTI4N30.ffhWiLH7vwCGdGbiMQVKP3PTiqlTK2RwS33WR9XwdMI";
+  const SUPABASE_URL = "process.env.https://YOUR_PROJECT_ID.supabase.co";
+  const SUPABASE_KEY = "process.env.eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImF0b3ZweXF2anNndnpwemV4bXl3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA0MDUyODcsImV4cCI6MjA5NTk4MTI4N30.ffhWiLH7vwCGdGbiMQVKP3PTiqlTK2RwS33WR9XwdMI";
   const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
   // Socket.IO
