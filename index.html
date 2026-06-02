@@ -1,0 +1,82 @@
+<canvas id="gameCanvas" width="800" height="400"></canvas>
+<div id="leaderboard"></div>
+<script src="/socket.io/socket.io.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+  const canvas = document.getElementById("gameCanvas");
+  const ctx = canvas.getContext("2d");
+
+  // Supabase
+  const SUPABASE_URL = "https://YOUR_PROJECT_ID.supabase.co";
+  const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImF0b3ZweXF2anNndnpwemV4bXl3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA0MDUyODcsImV4cCI6MjA5NTk4MTI4N30.ffhWiLH7vwCGdGbiMQVKP3PTiqlTK2RwS33WR9XwdMI";
+  const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+  // Socket.IO
+  const socket = io();
+
+  let player = { x:50, y:300, vy:0, hp:100 };
+  let obstacles = [];
+  let score = 0;
+
+  function update(){
+    // gravity
+    player.vy += 1;
+    player.y += player.vy;
+    if(player.y > 300){ player.y=300; player.vy=0; }
+
+    // spawn random obstacles
+    if(Math.random() < 0.02){
+      let type = Math.random() < 0.5 ? "spike" : "lava";
+      obstacles.push({x:800, y:300, type:type});
+    }
+
+    obstacles.forEach(o => o.x -= 5);
+
+    // collision
+    obstacles.forEach(o => {
+      if(o.x < player.x+30 && o.x+20 > player.x && o.y==player.y){
+        if(o.type==="spike" || o.type==="lava"){
+          player.hp -= 20;
+          if(player.hp<=0){
+            saveScore("Player1", score);
+            alert("Game Over! Score: "+score);
+            score=0; obstacles=[]; player.hp=100;
+          }
+        }
+      }
+    });
+
+    score++;
+    socket.emit("playerUpdate",{x:player.x,y:player.y,hp:player.hp,score:score});
+  }
+
+  function draw(){
+    ctx.clearRect(0,0,800,400);
+    ctx.fillRect(player.x, player.y, 30, 30);
+    obstacles.forEach(o=>{
+      ctx.fillStyle = o.type==="spike"?"gray":"red";
+      ctx.fillRect(o.x,o.y,20,20);
+    });
+    ctx.fillStyle="black";
+    ctx.fillText("HP:"+player.hp+" Score:"+score,10,20);
+  }
+
+  function loop(){
+    update();
+    draw();
+    requestAnimationFrame(loop);
+  }
+
+  document.addEventListener("keydown", e=>{
+    if(e.code==="Space" && player.y==300){
+      player.vy=-15;
+    }
+  });
+
+  loop();
+
+  // Supabase save score
+  async function saveScore(playerName, score){
+    await supabase.from('scores').insert([{player:playerName,score:score}]);
+  }
+</script>
